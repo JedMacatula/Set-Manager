@@ -1,0 +1,340 @@
+// PC, Windows 10, Visual Studio
+// Jed Macatula
+// 8/9/16
+
+using namespace std;
+
+#include<iostream>
+#include<string>
+#include<fstream>
+#include<vector>
+#include<iomanip>
+#include<sstream>
+
+void MAKENULL(vector<char> myArray[90], string myLine)	//makes specified set null
+{
+	myArray[myLine[9]].clear();
+	myArray[myLine[9]].push_back(NULL);
+}
+
+void INSERT(vector<char> myArray[90], string myLine)	//inserts the spcecified member into the set
+{
+	myArray[myLine[9]].push_back(myLine[7]);
+}
+
+void DELETE(vector<char> myArray[90], string myLine)	//deletes the specified member from the set
+{														//compares the specified member to each member in the set
+	for (int i = 0; i < myArray[myLine[9]].size(); i++)	// if the member is found it is erased
+	{
+		if (myLine[7] == myArray[myLine[9]][i])
+		{
+			myArray[myLine[9]].erase(myArray[myLine[9]].begin() + (i));
+		}
+	}
+}
+
+void PRINTSET(vector<char> myArray[90], string myLine, ofstream &outs)	//prints the members of the specified set
+{																		//if the set is empty it prints EMPTY SET
+	if (!myArray[myLine[9]].empty())
+	{
+		for (int i = 0; i < myArray[myLine[9]].size(); i++)
+		{
+			if (myArray[myLine[9]][i] != NULL)
+			{
+				cout << myArray[myLine[9]][i] << " ";
+				outs << myArray[myLine[9]][i] << " ";
+			}
+		}
+	}
+	else
+	{
+		cout << "EMPTY SET";
+		outs << "EMPTY SET";
+	}
+	cout << endl;
+	outs << endl;
+}
+
+void ASSIGN(vector<char> myArray[90], string myLine)	//copies the members of one set to another
+{
+	myArray[myLine[9]].clear();
+	myArray[myLine[9]] = myArray[myLine[7]];
+}
+
+void FINDPRINT(vector<char> myArray[90], string myLine, ofstream &outs)	//iterates through each set
+{																		//the specified member is compared to each
+	bool hasMember = false;												// member, if there is a match the set is printed
+
+	cout << "Sets that contain " << myLine[10] << ": ";
+	outs << "Sets that contain " << myLine[10] << ": ";
+	for (int i = 65; i < 90; i++)
+	{
+		hasMember = false;
+
+		for (int j = 0; j < myArray[i].size(); j++)
+		{
+			if (myArray[i][j] == myLine[10])
+			{
+				hasMember = true;
+			}
+		}
+
+		if (hasMember == true)
+		{
+			char myCharacter = i;
+			cout << myCharacter << ": ";
+			outs << myCharacter << ": ";
+			for (int j = 0; j < myArray[i].size(); j++)
+			{
+				if (myArray[i][j] != NULL)
+				{
+					cout << myArray[i][j] << " ";
+					outs << myArray[i][j] << " ";
+				}
+			}
+		}
+	}
+
+	cout << endl;
+	outs << endl;
+}
+
+void UNION(vector<char> myArray[90], string myLine)	//set 2 is subtracted from set 1
+{													// this prevents any duplications from
+	myArray[0].clear();								// ending up in the final set
+	myArray[0] = myArray[myLine[6]];				//set 2 is then re added to set 1 and
+	myArray[myLine[10]].clear();					// that combined set is located to the
+													// user specified location
+	for (int i = 0; i < myArray[0].size(); i++)
+	{
+		for (int j = 0; j < myArray[myLine[8]].size(); j++)
+		{
+			if (myArray[0][i] == myArray[myLine[8]][j])
+			{
+				myArray[0].erase(myArray[0].begin() + (i));
+			}
+		}
+	}
+
+	myArray[myLine[10]] = myArray[0];
+
+	for (int i = 0; i < myArray[myLine[8]].size(); i++)
+	{
+		myArray[myLine[10]].push_back(myArray[myLine[8]][i]);
+	}
+}
+
+void INTERSECTION(vector<char> myArray[90], string myLine)	//iterates through each member of set 2
+{															// for each member of set 1
+	myArray[myLine[17]].clear();							//if a match is found the member is pushed
+															// onto a third vector, the specified vector
+	for (int i = 0; i < myArray[myLine[13]].size(); i++)
+	{
+		for (int j = 0; j < myArray[myLine[15]].size(); j++)
+		{
+			if (myArray[myLine[13]][i] == myArray[myLine[15]][j])
+			{
+				myArray[myLine[17]].push_back(myArray[myLine[13]][i]);
+			}
+		}
+	}
+}
+
+void DIFFERENCE(vector<char> myArray[90], string myLine)	//iterates through set 2 for every
+{															// member of set 1
+	myArray[0].clear();										//if a match is found a flag is changed
+	bool located = false;									// and the member will not be pushed onto the
+															// 3rd vector
+	for (int i = 0; i < myArray[myLine[11]].size(); i++)	//else the member is pushed onto the vector
+	{
+		located = false;
+
+		for (int j = 0; j < myArray[myLine[13]].size(); j++)
+		{
+			if (myArray[myLine[11]][i] == myArray[myLine[13]][j])
+			{
+				located = true;
+			}
+		}
+
+		if (located == false)
+		{
+			myArray[0].push_back(myArray[myLine[11]][i]);
+		}
+	}
+
+	myArray[myLine[15]].clear();
+	myArray[myLine[15]] = myArray[0];
+}
+
+void DESTROY(vector<char> myArray[90], string myLine)	//clears the specified set
+{
+	myArray[myLine[8]].clear();
+}
+
+void EXIT(vector<char> myArray[90], ofstream &outs)		//prints out the non empty sets and their members
+{														// also exits the program
+	cout << endl << "All sets" << endl << "---------------------------------------" << endl;
+	outs << endl << "All sets" << endl << "---------------------------------------" << endl;
+
+	for (int i = 65; i < 90; i++)
+	{
+		if (!myArray[i].empty())
+		{
+			char myCharacter = i;
+			cout << myCharacter << ": ";
+			outs << myCharacter << ": ";
+			for (int j = 0; j < myArray[i].size() ; j++)
+			{
+				if (myArray[i][j] != NULL)
+				{
+					cout << myArray[i][j] << " ";
+					outs << myArray[i][j] << " ";
+				}
+			}
+			cout << endl;
+			outs << endl;
+		}
+	}
+}
+
+int main()
+{
+	ifstream ins;
+	ofstream outs;
+	ins.open("input.txt");
+	outs.open("output.txt");
+
+	string currentLine;
+	vector<char> masterArray[90];
+	int inputSelection;
+
+	cout << "Menu" << endl << "---------------------------------------" << endl;
+	cout << "1) Keyboard Input" << endl;
+	cout << "2) File Input" << endl;
+	cout << "Choose method of input (enter 1 or 2): ";
+	cin >> inputSelection;
+
+	if (inputSelection == 2)
+	{
+		cout << endl <<  "Output" << endl << "---------------------------------------" << endl;
+
+		while (!ins.eof())
+		{
+			getline(ins, currentLine);
+			if (currentLine[0] == 'M')
+			{
+				MAKENULL(masterArray, currentLine);
+			}
+			else if (currentLine[0] == 'I' && currentLine[2] == 'S')
+			{
+				INSERT(masterArray, currentLine);
+			}
+			else if (currentLine[0] == 'D' && currentLine[2] == 'L')
+			{
+				DELETE(masterArray, currentLine);
+			}
+			else if (currentLine[0] == 'P')
+			{
+				PRINTSET(masterArray, currentLine, outs);
+			}
+			else if (currentLine[0] == 'A')
+			{
+				ASSIGN(masterArray, currentLine);
+			}
+			else if (currentLine[0] == 'F')
+			{
+				FINDPRINT(masterArray, currentLine, outs);
+			}
+			else if (currentLine[0] == 'U')
+			{
+				UNION(masterArray, currentLine);
+			}
+			else if (currentLine[0] == 'I' && currentLine[2] == 'T')
+			{
+				INTERSECTION(masterArray, currentLine);
+			}
+			else if (currentLine[0] == 'D' && currentLine[2] == 'S')
+			{
+				DESTROY(masterArray, currentLine);
+			}
+			else if (currentLine[0] == 'D' && currentLine[2] == 'F')
+			{
+				DIFFERENCE(masterArray, currentLine);
+			}
+			else if (currentLine[0] == 'E')
+			{
+				EXIT(masterArray, outs);
+			}
+		}
+	}
+
+	else
+	{
+		cout << endl << "MENU" << endl << "---------------------------------------" << endl;
+		cout << "MAKENULL" << setw(18) << "DIFFERENCE" << endl;
+		cout << "INSERT" << setw(17) << "DESTROY" << endl;
+		cout << "DELETE" << setw(19) << "FINDPRINT" << endl;
+		cout << "ASSIGN" << setw(18) << "PRINTSET" << endl;
+		cout << "UNION" << setw(15) << "EXIT" << endl;
+		cout << "INTERSECTION" << endl;
+		cout << endl;
+		cout << "Enter each command with the members and sets seperated by a single space" << endl;
+		cout << "Example: INSERT a A" << endl << endl;
+
+		string operation;
+
+		while (operation != "EXIT")
+		{
+			getline(cin, operation);
+			if (operation[0] == 'M')
+			{
+				MAKENULL(masterArray, operation);
+			}
+			else if (operation[0] == 'I' && operation[2] == 'S')
+			{
+				INSERT(masterArray, operation);
+			}
+			else if (operation[0] == 'D' && operation[2] == 'L')
+			{
+				DELETE(masterArray, operation);
+			}
+			else if (operation[0] == 'P')
+			{
+				PRINTSET(masterArray, operation, outs);
+			}
+			else if (operation[0] == 'A')
+			{
+				ASSIGN(masterArray, operation);
+			}
+			else if (operation[0] == 'F')
+			{
+				FINDPRINT(masterArray, operation, outs);
+			}
+			else if (operation[0] == 'U')
+			{
+				UNION(masterArray, operation);
+			}
+			else if (operation[0] == 'I' && operation[2] == 'T')
+			{
+				INTERSECTION(masterArray, operation);
+			}
+			else if (operation[0] == 'D' && operation[2] == 'S')
+			{
+				DESTROY(masterArray, operation);
+			}
+			else if (operation[0] == 'D' && operation[2] == 'F')
+			{
+				DIFFERENCE(masterArray, operation);
+			}
+			else if (operation[0] == 'E')
+			{
+				EXIT(masterArray, outs);
+			}
+		}
+	}
+
+	cout << endl;
+	system("pause");
+	return 0;
+}
